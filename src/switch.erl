@@ -102,6 +102,10 @@ switch(Name, ArpTable, MacTable, Interfaces, Gateway) ->
       NewInterfaces = l2_interfaces:connect(Interfaces, Port, Pid, Monitor),
       io:format("[~w]: ~w connected at interface ~w~n", [Name, DeviceName, Port]),
       switch(Name, ArpTable, MacTable, NewInterfaces, Gateway);
+    {'DOWN', Monitor, process, Pid, _} ->
+      erlang:demonitor(Monitor),
+      {NewInterfaces, NewMacs} =  l2_interfaces:disconnect(Interfaces, MacTable, Pid),
+      switch(Name, ArpTable, NewMacs, NewInterfaces, Gateway);
     stop ->
       ok
   end.

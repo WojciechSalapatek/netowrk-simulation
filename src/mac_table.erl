@@ -10,7 +10,7 @@
 -author("wojciech").
 
 %% API
--export([create/0, print_pretty/2, add/3, get_for_mac/2, get_for_port/2]).
+-export([create/0, print_pretty/2, add/3, get_for_mac/2, get_for_port/2, remove/2]).
 
 
 create() -> [].
@@ -22,6 +22,15 @@ add(MacTable, Port, Mac) ->
       [{Port, Mac} | Macs];
     false ->
       [{Port, Mac} | MacTable]
+  end.
+
+remove(MacTable, Port) ->
+  case lists:keyfind(Port, 1, MacTable) of
+    {Port, Mac} ->
+      Macs = lists:keydelete(Mac, 2, MacTable),
+      Macs;
+    false ->
+      MacTable
   end.
 
 get_for_mac(MacTable, Mac) ->

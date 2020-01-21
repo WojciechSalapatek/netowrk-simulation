@@ -10,7 +10,7 @@
 -author("wojciech").
 
 %% API
--export([create/0, connect/4, print_pretty/2, broadcast/2, get_for_name/2, send/3, get_for_pid/2]).
+-export([create/0, connect/4, print_pretty/2, broadcast/2, get_for_name/2, send/3, get_for_pid/2, disconnect/3]).
 
 create() -> [].
 
@@ -33,6 +33,17 @@ get_for_pid(Interfaces, Pid) ->
 send(Interfaces, Port, Msg) ->
   {_, Pid, _} = lists:keyfind(Port, 1, Interfaces),
   Pid ! Msg.
+
+disconnect(Interfaces, MacTable, Pid) ->
+  case lists:keyfind(Pid, 2, Interfaces) of
+    {IntName, _, OldMonitor} ->
+      erlang:demonitor(OldMonitor),
+      Ints = lists:keydelete(IntName, 1, Interfaces),
+      Macs = mac_table:remove(MacTable, IntName),
+      {Ints, Macs};
+    false ->
+      {Interfaces, MacTable}
+  end.
 
 broadcast([], _) -> ok;
 broadcast([{_, Pid, _} | T], Msg) ->
